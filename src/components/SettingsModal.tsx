@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sliders, Volume2, Eye, ShieldCheck, Play } from 'lucide-react';
+import { X, Sliders, Volume2, Eye, ShieldCheck, Play, Camera } from 'lucide-react';
 import { AppSettings } from '../types';
 import { voiceService } from '../utils/voice';
 
@@ -185,7 +185,43 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
-          {/* Section 3: Overlay Visual Options */}
+          {/* Section 3: Camera Mode Selection */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+              <Camera className="w-4 h-4" />
+              <span>PILIHAN KAMERA (PERANGKAT / ANDROID)</span>
+            </h3>
+
+            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-2">
+              <label className="block text-slate-300 font-mono font-medium mb-1">
+                Kamera yang Digunakan:
+              </label>
+              <div className="grid grid-cols-2 gap-2 font-mono">
+                <button
+                  onClick={() => onUpdateSettings({ cameraFacingMode: 'environment' })}
+                  className={`py-2 rounded-xl border text-xs font-bold transition-all ${
+                    settings.cameraFacingMode === 'environment'
+                      ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
+                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
+                  }`}
+                >
+                  Kamera Belakang (Utama)
+                </button>
+                <button
+                  onClick={() => onUpdateSettings({ cameraFacingMode: 'user' })}
+                  className={`py-2 rounded-xl border text-xs font-bold transition-all ${
+                    settings.cameraFacingMode === 'user'
+                      ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
+                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
+                  }`}
+                >
+                  Kamera Depan (Selfie)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Overlay Visual Options */}
           <div className="space-y-3">
             <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
               <Eye className="w-4 h-4" />

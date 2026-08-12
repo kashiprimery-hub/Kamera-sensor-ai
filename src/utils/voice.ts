@@ -83,7 +83,7 @@ class VoiceService {
     };
 
     utterance.onerror = (e) => {
-      console.warn('Speech synthesis error:', e);
+      console.warn('Speech synthesis error:', e?.error || e?.type || 'Speech error');
       this.isSpeaking = false;
     };
 

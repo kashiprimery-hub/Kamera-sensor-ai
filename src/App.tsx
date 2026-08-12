@@ -34,7 +34,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   showConfidence: true,
   showTrackingId: true,
   showMotionVectors: true,
-  cameraFacingMode: 'user',
+  cameraFacingMode: 'environment', // Kamera belakang (environment) secara default untuk Android / Mobile
   demoMode: false
 };
 
@@ -88,8 +88,28 @@ export default function App() {
   // Save Settings
   const handleUpdateSettings = (newPartial: Partial<AppSettings>) => {
     setSettings((prev) => {
-      const updated = { ...prev, ...newPartial };
-      localStorage.setItem('ai_motion_settings', JSON.stringify(updated));
+      const updated: AppSettings = {
+        detectionSensitivity: newPartial.detectionSensitivity ?? prev.detectionSensitivity,
+        confidenceThreshold: typeof newPartial.confidenceThreshold === 'number' ? newPartial.confidenceThreshold : prev.confidenceThreshold,
+        voiceEnabled: typeof newPartial.voiceEnabled === 'boolean' ? newPartial.voiceEnabled : prev.voiceEnabled,
+        voiceLanguage: newPartial.voiceLanguage ?? prev.voiceLanguage,
+        voiceSpeed: typeof newPartial.voiceSpeed === 'number' ? newPartial.voiceSpeed : prev.voiceSpeed,
+        voicePitch: typeof newPartial.voicePitch === 'number' ? newPartial.voicePitch : prev.voicePitch,
+        voiceCooldownSec: typeof newPartial.voiceCooldownSec === 'number' ? newPartial.voiceCooldownSec : prev.voiceCooldownSec,
+        motionTrackingEnabled: typeof newPartial.motionTrackingEnabled === 'boolean' ? newPartial.motionTrackingEnabled : prev.motionTrackingEnabled,
+        showBoundingBox: typeof newPartial.showBoundingBox === 'boolean' ? newPartial.showBoundingBox : prev.showBoundingBox,
+        showObjectPoint: typeof newPartial.showObjectPoint === 'boolean' ? newPartial.showObjectPoint : prev.showObjectPoint,
+        showConfidence: typeof newPartial.showConfidence === 'boolean' ? newPartial.showConfidence : prev.showConfidence,
+        showTrackingId: typeof newPartial.showTrackingId === 'boolean' ? newPartial.showTrackingId : prev.showTrackingId,
+        showMotionVectors: typeof newPartial.showMotionVectors === 'boolean' ? newPartial.showMotionVectors : prev.showMotionVectors,
+        cameraFacingMode: newPartial.cameraFacingMode ?? prev.cameraFacingMode,
+        demoMode: typeof newPartial.demoMode === 'boolean' ? newPartial.demoMode : prev.demoMode
+      };
+      try {
+        localStorage.setItem('ai_motion_settings', JSON.stringify(updated));
+      } catch (e) {
+        console.warn('Failed saving settings:', e instanceof Error ? e.message : String(e));
+      }
       return updated;
     });
   };
@@ -142,24 +162,57 @@ export default function App() {
   }, []);
 
   // Start Camera Helper
-  const startCamera = useCallback(async () => {
+  const startCamera = useCallback(async (facingOverride?: 'user' | 'environment') => {
     stopCamera();
     setSystemState((prev) => ({ ...prev, cameraError: null }));
 
+    const targetFacing = facingOverride || settings.cameraFacingMode;
+
     // Disable demo mode when physical camera starts
-    handleUpdateSettings({ demoMode: false });
+    handleUpdateSettings({ demoMode: false, cameraFacingMode: targetFacing });
 
     try {
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: settings.cameraFacingMode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-        audio: false
+      let videoConstraints: MediaTrackConstraints = {
+        facingMode: { ideal: targetFacing },
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
       };
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      // Query devices to prioritize exact rear camera on Android mobile devices
+      if (targetFacing === 'environment' && navigator.mediaDevices?.enumerateDevices) {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoInputs = devices.filter((d) => d.kind === 'videoinput');
+          const rearDevice = videoInputs.find((d) =>
+            /back|rear|environment|belakang|main|0/i.test(d.label)
+          );
+
+          if (rearDevice && rearDevice.deviceId) {
+            videoConstraints = {
+              deviceId: { exact: rearDevice.deviceId },
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            };
+          }
+        } catch (enumErr) {
+          console.warn('Could not enumerate video devices:', enumErr);
+        }
+      }
+
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: videoConstraints,
+          audio: false
+        });
+      } catch (firstTryErr) {
+        // Fallback to basic facingMode constraint
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: targetFacing },
+          audio: false
+        });
+      }
+
       mediaStreamRef.current = stream;
 
       if (videoRef.current) {
@@ -186,6 +239,7 @@ export default function App() {
   const switchCamera = () => {
     const nextFacing = settings.cameraFacingMode === 'user' ? 'environment' : 'user';
     handleUpdateSettings({ cameraFacingMode: nextFacing });
+    startCamera(nextFacing);
   };
 
   // Toggle Demo Mode

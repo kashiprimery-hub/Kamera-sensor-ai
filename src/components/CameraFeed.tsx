@@ -236,7 +236,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
   const handleFullscreen = () => {
     if (containerRef.current) {
       if (!document.fullscreenElement) {
-        containerRef.current.requestFullscreen().catch((err) => console.error(err));
+        containerRef.current.requestFullscreen().catch((err) => console.error(err?.message || 'Fullscreen error'));
       } else {
         document.exitFullscreen();
       }
@@ -398,11 +398,13 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
           <button
             onClick={onSwitchCamera}
             className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-medium transition-all flex items-center gap-1.5"
-            title="Ganti Kamera Depan/Belakang"
+            title="Ganti Kamera Depan / Belakang"
             id="btn-switch-camera"
           >
             <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline">Ganti Kamera</span>
+            <span>
+              {settings.cameraFacingMode === 'environment' ? 'Kamera Belakang' : 'Kamera Depan'}
+            </span>
           </button>
 
           <button
