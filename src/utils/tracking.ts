@@ -135,7 +135,7 @@ export class TrackingEngine {
         }
 
         // Analyze Motion & Direction
-        const isMirrored = settings.cameraFacingMode === 'user' && !settings.demoMode;
+        const isMirrored = !!settings.flipHorizontal && !settings.demoMode;
         const motionAnalysis = this.analyzeMotion(obj.history, frameWidth, frameHeight, isMirrored);
         obj.status = motionAnalysis.status;
         obj.direction = motionAnalysis.direction;

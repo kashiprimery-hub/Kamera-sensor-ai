@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Camera, RefreshCw, AlertTriangle, Play, Pause, Eye, Maximize2 } from 'lucide-react';
+import { Camera, RefreshCw, AlertTriangle, Play, Pause, Eye, Maximize2, FlipHorizontal } from 'lucide-react';
 import { TrackedObject, AppSettings, SystemState } from '../types';
 
 interface CameraFeedProps {
@@ -11,6 +11,7 @@ interface CameraFeedProps {
   onStartCamera: () => void;
   onStopCamera: () => void;
   onSwitchCamera: () => void;
+  onToggleFlipHorizontal?: () => void;
   onToggleDemoMode: () => void;
   selectedObjectId?: string | null;
   onSelectObject: (id: string | null) => void;
@@ -25,6 +26,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
   onStartCamera,
   onStopCamera,
   onSwitchCamera,
+  onToggleFlipHorizontal,
   onToggleDemoMode,
   selectedObjectId,
   onSelectObject
@@ -49,7 +51,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const isMirrored = settings.cameraFacingMode === 'user' && !settings.demoMode;
+    const isMirrored = !!settings.flipHorizontal && !settings.demoMode;
 
     // Draw overlay items for each tracked object
     trackedObjects.forEach((obj) => {
@@ -255,7 +257,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
         <video
           ref={videoRef}
           className={`w-full h-full object-contain ${
-            settings.cameraFacingMode === 'user' && !settings.demoMode ? '-scale-x-100' : ''
+            settings.flipHorizontal && !settings.demoMode ? '-scale-x-100' : ''
           }`}
           playsInline
           muted
@@ -273,7 +275,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
             const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
             const clickY = ((e.clientY - rect.top) / rect.height) * canvas.height;
 
-            const isMirrored = settings.cameraFacingMode === 'user' && !settings.demoMode;
+            const isMirrored = !!settings.flipHorizontal && !settings.demoMode;
             const clickXOnRaw = isMirrored ? canvas.width - clickX : clickX;
 
             // Check if click is inside any object bounding box
@@ -318,13 +320,13 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
                 <p className="text-xs text-rose-300/80">{systemState.cameraError}</p>
                 <div className="flex flex-wrap justify-center gap-2 mt-2">
                   <button
-                    onClick={onStartCamera}
+                    onClick={() => onStartCamera()}
                     className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-lg"
                   >
                     Coba Lagi Akses Kamera
                   </button>
                   <button
-                    onClick={onToggleDemoMode}
+                    onClick={() => onToggleDemoMode()}
                     className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition-all"
                   >
                     Gunakan Mode Simulasi Demo
@@ -341,7 +343,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
                 </h3>
                 <div className="flex flex-wrap justify-center gap-3">
                   <button
-                    onClick={onStartCamera}
+                    onClick={() => onStartCamera()}
                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs tracking-wide shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2"
                     id="btn-start-camera-main"
                   >
@@ -349,7 +351,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
                     <span>AKTIFKAN KAMERA</span>
                   </button>
                   <button
-                    onClick={onToggleDemoMode}
+                    onClick={() => onToggleDemoMode()}
                     className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 font-bold text-xs transition-all flex items-center gap-2"
                     id="btn-demo-mode-main"
                   >
@@ -377,7 +379,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
         <div className="flex items-center flex-wrap gap-2">
           {systemState.isCameraOnline ? (
             <button
-              onClick={onStopCamera}
+              onClick={() => onStopCamera()}
               className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-bold transition-all flex items-center gap-2"
               id="btn-stop-camera"
             >
@@ -386,7 +388,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
             </button>
           ) : (
             <button
-              onClick={onStartCamera}
+              onClick={() => onStartCamera()}
               className="px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition-all flex items-center gap-2"
               id="btn-start-camera"
             >
@@ -396,7 +398,7 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
           )}
 
           <button
-            onClick={onSwitchCamera}
+            onClick={() => onSwitchCamera()}
             className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs font-medium transition-all flex items-center gap-1.5"
             title="Ganti Kamera Depan / Belakang"
             id="btn-switch-camera"
@@ -407,8 +409,24 @@ export const CameraFeed: React.FC<CameraFeedProps> = ({
             </span>
           </button>
 
+          {onToggleFlipHorizontal && (
+            <button
+              onClick={onToggleFlipHorizontal}
+              className={`px-3 py-2 rounded-xl border text-xs font-medium transition-all flex items-center gap-1.5 ${
+                settings.flipHorizontal
+                  ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                  : 'bg-slate-800 border-slate-700/80 text-slate-300 hover:bg-slate-700'
+              }`}
+              title="Balik Layar Horizontal (Flip Mirror)"
+              id="btn-toggle-flip"
+            >
+              <FlipHorizontal className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Flip: {settings.flipHorizontal ? 'ON' : 'OFF'}</span>
+            </button>
+          )}
+
           <button
-            onClick={onToggleDemoMode}
+            onClick={() => onToggleDemoMode()}
             className={`px-3 py-2 rounded-xl border text-xs font-medium transition-all flex items-center gap-1.5 ${
               settings.demoMode
                 ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'

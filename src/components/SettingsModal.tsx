@@ -192,31 +192,69 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>PILIHAN KAMERA (PERANGKAT / ANDROID)</span>
             </h3>
 
-            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-2">
-              <label className="block text-slate-300 font-mono font-medium mb-1">
-                Kamera yang Digunakan:
-              </label>
-              <div className="grid grid-cols-2 gap-2 font-mono">
-                <button
-                  onClick={() => onUpdateSettings({ cameraFacingMode: 'environment' })}
-                  className={`py-2 rounded-xl border text-xs font-bold transition-all ${
-                    settings.cameraFacingMode === 'environment'
-                      ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
-                  }`}
-                >
-                  Kamera Belakang (Utama)
-                </button>
-                <button
-                  onClick={() => onUpdateSettings({ cameraFacingMode: 'user' })}
-                  className={`py-2 rounded-xl border text-xs font-bold transition-all ${
-                    settings.cameraFacingMode === 'user'
-                      ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
-                  }`}
-                >
-                  Kamera Depan (Selfie)
-                </button>
+            <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
+              <div>
+                <label className="block text-slate-300 font-mono font-medium mb-1.5">
+                  Kamera yang Digunakan:
+                </label>
+                <div className="grid grid-cols-2 gap-2 font-mono">
+                  <button
+                    onClick={() => onUpdateSettings({ cameraFacingMode: 'environment' })}
+                    className={`py-2 rounded-xl border text-xs font-bold transition-all ${
+                      settings.cameraFacingMode === 'environment'
+                        ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
+                    }`}
+                  >
+                    Kamera Belakang (Utama)
+                  </button>
+                  <button
+                    onClick={() => onUpdateSettings({ cameraFacingMode: 'user' })}
+                    className={`py-2 rounded-xl border text-xs font-bold transition-all ${
+                      settings.cameraFacingMode === 'user'
+                        ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
+                    }`}
+                  >
+                    Kamera Depan (Selfie)
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-800/80">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-slate-300 font-mono font-medium text-xs">
+                    Flip / Cermin Layar Horizontal:
+                  </label>
+                  <span className="text-[10px] text-cyan-400 font-mono">
+                    {settings.flipHorizontal ? 'AKTIF (MIRRORED)' : 'NORMAL'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 mb-2">
+                  Membalikkan tampilan video & indikator overlay secara cermin (dapat diterapkan ke kamera depan maupun belakang).
+                </p>
+                <div className="grid grid-cols-2 gap-2 font-mono">
+                  <button
+                    onClick={() => onUpdateSettings({ flipHorizontal: true })}
+                    className={`py-1.5 rounded-xl border text-xs font-bold transition-all ${
+                      settings.flipHorizontal
+                        ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
+                    }`}
+                  >
+                    Flip ON (Cermin)
+                  </button>
+                  <button
+                    onClick={() => onUpdateSettings({ flipHorizontal: false })}
+                    className={`py-1.5 rounded-xl border text-xs font-bold transition-all ${
+                      !settings.flipHorizontal
+                        ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800'
+                    }`}
+                  >
+                    Flip OFF (Normal)
+                  </button>
+                </div>
               </div>
             </div>
           </div>

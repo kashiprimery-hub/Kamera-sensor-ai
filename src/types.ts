@@ -93,6 +93,7 @@ export interface AppSettings {
   showTrackingId: boolean;
   showMotionVectors: boolean;
   cameraFacingMode: 'user' | 'environment';
+  flipHorizontal: boolean;
   demoMode: boolean;
 }
 

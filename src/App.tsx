@@ -35,6 +35,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   showTrackingId: true,
   showMotionVectors: true,
   cameraFacingMode: 'environment', // Kamera belakang (environment) secara default untuk Android / Mobile
+  flipHorizontal: false, // Default false, tapi bisa di-flip untuk kamera belakang maupun depan
   demoMode: false
 };
 
@@ -102,7 +103,8 @@ export default function App() {
         showConfidence: typeof newPartial.showConfidence === 'boolean' ? newPartial.showConfidence : prev.showConfidence,
         showTrackingId: typeof newPartial.showTrackingId === 'boolean' ? newPartial.showTrackingId : prev.showTrackingId,
         showMotionVectors: typeof newPartial.showMotionVectors === 'boolean' ? newPartial.showMotionVectors : prev.showMotionVectors,
-        cameraFacingMode: newPartial.cameraFacingMode ?? prev.cameraFacingMode,
+        cameraFacingMode: (newPartial.cameraFacingMode === 'user' || newPartial.cameraFacingMode === 'environment') ? newPartial.cameraFacingMode : prev.cameraFacingMode,
+        flipHorizontal: typeof newPartial.flipHorizontal === 'boolean' ? newPartial.flipHorizontal : (newPartial.cameraFacingMode ? newPartial.cameraFacingMode === 'user' : prev.flipHorizontal),
         demoMode: typeof newPartial.demoMode === 'boolean' ? newPartial.demoMode : prev.demoMode
       };
       try {
@@ -166,7 +168,10 @@ export default function App() {
     stopCamera();
     setSystemState((prev) => ({ ...prev, cameraError: null }));
 
-    const targetFacing = facingOverride || settings.cameraFacingMode;
+    const targetFacing: 'user' | 'environment' =
+      typeof facingOverride === 'string' && (facingOverride === 'user' || facingOverride === 'environment')
+        ? facingOverride
+        : settings.cameraFacingMode;
 
     // Disable demo mode when physical camera starts
     handleUpdateSettings({ demoMode: false, cameraFacingMode: targetFacing });
@@ -238,7 +243,8 @@ export default function App() {
   // Switch Camera Facing Mode
   const switchCamera = () => {
     const nextFacing = settings.cameraFacingMode === 'user' ? 'environment' : 'user';
-    handleUpdateSettings({ cameraFacingMode: nextFacing });
+    const nextFlip = nextFacing === 'user';
+    handleUpdateSettings({ cameraFacingMode: nextFacing, flipHorizontal: nextFlip });
     startCamera(nextFacing);
   };
 
@@ -390,6 +396,7 @@ export default function App() {
               onStartCamera={startCamera}
               onStopCamera={stopCamera}
               onSwitchCamera={switchCamera}
+              onToggleFlipHorizontal={() => handleUpdateSettings({ flipHorizontal: !settings.flipHorizontal })}
               onToggleDemoMode={toggleDemoMode}
               selectedObjectId={selectedObjectId}
               onSelectObject={setSelectedObjectId}
