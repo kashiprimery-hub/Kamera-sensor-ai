@@ -1,0 +1,6 @@
+{
+  "name": "AI Motion Object Sensor",
+  "description": "Realtime AI Object Motion Sensor & Tracking System with Indonesian Voice Notifications",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
